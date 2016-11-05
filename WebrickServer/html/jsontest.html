@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<!--<script type="text/javascript"
+      src="http://maps.googleapis.com/maps/api/js?key=AIzaSyCJbcnBWDdRJTJ5IYKQfxnnmvIOMdS8_HQ">
+    </script>-->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+<script type="text/javascript">
+
+$(function(){
+  // JSONファイル読み込み開始
+  $.ajax({
+    url:"http://210.146.64.140:4567/hotspot",
+    cache:false,
+    dataType:"json",
+    success:function(json){
+      var data=jsonRequest(json);
+            alert(json[0].coordinates);
+    }
+  });
+});
+
+
+// JSONファイル読み込み完了
+function jsonRequest(json){
+  var data=[];
+  if(json.Marker){
+    var n=json.Marker.length;
+    for(var i=0;i<n;i++){
+      data.push(json.Marker[i]);
+    }
+  }
+  return data;
+}
+
+function initialize(data){
+
+  var dat=data[i]
+  alert(dat[i]);
+
+}
+
+/*
+// マップを生成して、複数のマーカーを追加
+function initialize(data){
+  var op={
+    zoom:15,
+    center:new google.maps.LatLng(35.507456,139.617585),
+    mapTypeId:google.maps.MapTypeId.ROADMAP
+  };
+  var map=new google.maps.Map(document.getElementById("map_canvas"),op);
+
+  var i=data.length;
+  while(i-- >0){
+    var dat=data[i];
+    var obj={
+      position:new google.maps.LatLng(dat.lat,dat.lng),
+      map:map
+    };
+    var marker=new google.maps.Marker(obj);
+  }
+}
+*/
+</script>
+</head>
+<body>
+<div id="map_canvas" style="width:550px;height:400px"></div>
+<input type = "button" id = "btn" value ="名前" onclick = "関数()"/>
+</body>
+</html>

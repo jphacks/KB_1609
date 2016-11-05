@@ -4,17 +4,16 @@ class Geo_Analysis
   attr_reader :hot_spots
   # hotspot = [{id: 1, coordinates: [34,135], tweets_coordinates: [[34,136], ...]}...]
 
-  def initialize(geo_tags, thresh=6, neightborhood = 0.001)
-    @thresh = thresh + 1 # hot-spotとする下限
+  def initialize(geo_tags, number=1, neightborhood = 0.0005)
+    # @thresh = thresh + 1  hot-spotとする下限   仕様変更でお亡くなり
+    @number =number # 取得するホットスポットの数
     @geo_info =[] # geo tagの一覧と ご近所さん結果
     @hot_spots = [] # hot spotの結果
-    @neigh = neightborhood ** 2
+    @neigh = neightborhood ** 2 # 半径60メール
     @squear = []
     @geo_buf= []
-    i=0
     geo_tags.each do |row|
-      @geo_info.push({:id => i, :lat=> row[0], :lon => row[1], :neigh => []})
-      i += 1
+      @geo_info.push({:id => row[:id], :lat=> row[:lat], :lon => row[:lng], :neigh => []})
     end
     self.analyze
   end
@@ -23,22 +22,19 @@ class Geo_Analysis
     @geo_buf =@geo_info
     id =0
     self.find_neigh
-    while
-    ((raw = @geo_buf.max_by{|max|
-      max[:neigh].size
-    })[:neigh].size >= @thresh)
+    while(id < @number)
+      raw = @geo_buf.max_by{|max|
+        max[:neigh].size}
       id +=1
-      tweets_coordinates =[]
+      tweets =[]
       raw[:neigh].each do |neight|
         @geo_info.each do |raw|
           if(raw[:id] == neight)
-            tweets_coordinates << [raw[:lat], raw[:lon]]
+            tweets<< {tweet_id:raw[:id],tweets_coordinates:[raw[:lat], raw[:lon]]}
           end
         end
-
       end
-
-      @hot_spots << {id: id, coordinates: self.avarage(raw), tweets_coordinates: tweets_coordinates}
+      @hot_spots << {id: id, coordinates: self.avarage(raw), tweets: tweets}
       self.remove_geo(raw[:neigh])
     end
   end
@@ -93,9 +89,9 @@ class Geo_Analysis
   end
 end
 
-
-geo_tags = [[34.701234, 135.189666], [34.701385, 135.189516], [34.701039, 135.18991], [34.701622, 135.190088], [34.702358, 135.190568], [34.702423, 135.192115], [34.702366, 135.190811], [34.700914, 135.190675], [34.700932, 135.191524], [34.701301, 135.19149], [34.701245, 135.191548], [34.699618, 135.193126], [34.69983, 135.190226], [34.698321, 135.191102], [34.701042, 135.189356], [34.694749, 135.190626], [34.69889, 135.193623], [34.701397, 135.189779], [34.701378, 135.189573], [34.701257, 135.189652]]
-
-geo_analysis = Geo_Analysis.new(geo_tags)
-
-p geo_analysis.hot_spots
+#
+# geo_tags = [{:id=>794440796107702275, :lat=>34.68833985, :lng=>135.18417953}, {:id=>794439413333950464, :lat=>34.69223973, :lng=>135.19508955}, {:id=>794435906333708288, :lat=>34.69177526, :lng=>135.19554226}, {:id=>794434275684872195, :lat=>34.69351595, :lng=>135.1930227}, {:id=>794433054764888064, :lat=>34.69179797, :lng=>135.19364}, {:id=>794432896115310592, :lat=>34.69452263, :lng=>135.19471915}, {:id=>794431167655051264, :lat=>34.69532383, :lng=>135.1875696}, {:id=>794431085367140352, :lat=>34.68818321, :lng=>135.18855093}, {:id=>794430911584448512, :lat=>34.69258492, :lng=>135.19053553}, {:id=>794430542129332224, :lat=>34.69395698, :lng=>135.19599954}, {:id=>794430455227514881, :lat=>34.69432687, :lng=>135.19581663}, {:id=>794430306778484736, :lat=>34.69423838, :lng=>135.19409269}, {:id=>794430262591582208, :lat=>34.693806, :lng=>135.19709945}, {:id=>794429827402993664, :lat=>34.69416225, :lng=>135.19027217}, {:id=>794440796107702275, :lat=>34.68833985, :lng=>135.18417953}, {:id=>794439413333950464, :lat=>34.69223973, :lng=>135.19508955}, {:id=>794435906333708288, :lat=>34.69177526, :lng=>135.19554226}, {:id=>794434275684872195, :lat=>34.69351595, :lng=>135.1930227}, {:id=>794433054764888064, :lat=>34.69179797, :lng=>135.19364}, {:id=>794432896115310592, :lat=>34.69452263, :lng=>135.19471915}, {:id=>794431167655051264, :lat=>34.69532383, :lng=>135.1875696}, {:id=>794431085367140352, :lat=>34.68818321, :lng=>135.18855093}, {:id=>794430911584448512, :lat=>34.69258492, :lng=>135.19053553}, {:id=>794430542129332224, :lat=>34.69395698, :lng=>135.19599954}, {:id=>794430455227514881, :lat=>34.69432687, :lng=>135.19581663}, {:id=>794430306778484736, :lat=>34.69423838, :lng=>135.19409269}, {:id=>794430262591582208, :lat=>34.693806, :lng=>135.19709945}, {:id=>794429827402993664, :lat=>34.69416225, :lng=>135.19027217}]
+#
+# geo_analysis = Geo_Analysis.new(geo_tags)
+#
+# p geo_analysis.hot_spots
